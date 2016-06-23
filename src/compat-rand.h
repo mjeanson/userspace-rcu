@@ -28,6 +28,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "config.h"
+
 #ifndef HAVE_RAND_R
 /*
  * Reentrant random function from POSIX.1c.

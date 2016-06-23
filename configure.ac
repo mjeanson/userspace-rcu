@@ -12,7 +12,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE([foreign dist-bzip2 no-dist-gzip])
+AM_INIT_AUTOMAKE([foreign dist-bzip2 no-dist-gzip nostdinc])
 AM_MAINTAINER_MODE([enable])
 
 # Enable silent rules if available (Introduced in AM 1.11)
@@ -84,7 +84,7 @@ CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 CC="$PTHREAD_CC"
 
 # Checks for library functions.
-AC_FUNC_MALLOC
+#AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_FUNC_FORK
 AC_CHECK_FUNCS([ \
@@ -269,12 +269,6 @@ AS_IF([test "x$def_smp_support" = "xyes"], [AC_DEFINE([CONFIG_RCU_SMP], [1])])
 #  int sched_setaffinity (pid_t __pid, const cpu_set_t *__mask);
 # ~~~~
 
-# Since we define _GNU_SOURCE in the sources, must do so too in the
-# autoconf tests, as defining _GNU_SOURCE or not exposes
-# sched_setaffinity bits differently.
-saved_CFLAGS=$CFLAGS
-CFLAGS="$CFLAGS -D_GNU_SOURCE"
-
 AC_CHECK_TYPES([cpu_set_t],
 	[have_cpu_set_t="yes"],
 	[have_cpu_set_t="no"],
@@ -284,7 +278,6 @@ AC_CHECK_TYPES([cpu_set_t],
 AC_MSG_CHECKING([whether CPU_ZERO works])
 AH_TEMPLATE([HAVE_CPU_ZERO], [Defined to 1 if we have CPU_ZERO and it works])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-		#define _GNU_SOURCE
 		#include <sched.h>
 		int main()
 		{
@@ -303,7 +296,6 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 AC_MSG_CHECKING([whether CPU_SET works])
 AH_TEMPLATE([HAVE_CPU_SET], [Defined to 1 if we have CPU_SET and it works])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-		#define _GNU_SOURCE
 		#include <sched.h>
 		int main()
 		{
@@ -353,9 +345,8 @@ AC_CHECK_FUNCS([sched_setaffinity],[
 	])
 ])
 
-CFLAGS=$saved_CFLAGS
-
-DEFAULT_INCLUDES="-I\$(top_srcdir) -I\$(top_builddir) -I\$(top_builddir)/src -I\$(top_builddir)/include -include config.h"
+DEFAULT_INCLUDES="-include config.h"
+AC_SUBST(DEFAULT_INCLUDES)
 
 AC_CONFIG_LINKS([
 	include/urcu/arch.h:$ARCHSRC
