@@ -5,8 +5,7 @@ AC_INIT([userspace-rcu],[0.9.0],[mathieu dot desnoyers at efficios dot com], [],
 # http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
 AC_SUBST([URCU_LIBRARY_VERSION], [5:0:1])
 
-AC_CONFIG_SRCDIR([urcu.h])
-AC_CONFIG_HEADERS([config.h urcu/config.h])
+AC_CONFIG_HEADERS([include/config.h include/urcu/config.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -148,8 +147,8 @@ AS_CASE([$host],[*-cygwin*],
 AC_SUBST(ARCHTYPE)
 AC_SUBST(SUBARCHTYPE)
 
-UATOMICSRC=urcu/uatomic/$ARCHTYPE.h
-ARCHSRC=urcu/arch/$ARCHTYPE.h
+UATOMICSRC=include/urcu/uatomic/$ARCHTYPE.h
+ARCHSRC=include/urcu/arch/$ARCHTYPE.h
 
 AS_IF([test "x$SUBARCHTYPE" = xx86compat],[
 	AC_DEFINE([CONFIG_RCU_COMPAT_ARCH], [1])
@@ -355,14 +354,18 @@ AC_CHECK_FUNCS([sched_setaffinity],[
 
 CFLAGS=$saved_CFLAGS
 
+DEFAULT_INCLUDES="-I\$(top_srcdir) -I\$(top_builddir) -I\$(top_builddir)/src -I\$(top_builddir)/include -include config.h"
+
 AC_CONFIG_LINKS([
-	urcu/arch.h:$ARCHSRC
-	urcu/uatomic.h:$UATOMICSRC
+	include/urcu/arch.h:$ARCHSRC
+	include/urcu/uatomic.h:$UATOMICSRC
 ])
 AC_CONFIG_FILES([
 	Makefile
 	doc/Makefile
 	doc/examples/Makefile
+	include/Makefile
+	src/Makefile
 	tests/Makefile
 	tests/common/Makefile
 	tests/unit/Makefile
@@ -370,12 +373,12 @@ AC_CONFIG_FILES([
 	tests/regression/Makefile
 	tests/regression/regression_tests
 	tests/utils/Makefile
-	liburcu.pc
-	liburcu-bp.pc
-	liburcu-cds.pc
-	liburcu-qsbr.pc
-	liburcu-mb.pc
-	liburcu-signal.pc
+	src/liburcu.pc
+	src/liburcu-bp.pc
+	src/liburcu-cds.pc
+	src/liburcu-qsbr.pc
+	src/liburcu-mb.pc
+	src/liburcu-signal.pc
 ])
 AC_OUTPUT
 
