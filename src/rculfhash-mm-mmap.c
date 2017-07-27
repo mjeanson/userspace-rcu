@@ -28,14 +28,6 @@
 #define MAP_ANONYMOUS		MAP_ANON
 #endif
 
-#ifdef __CYGWIN__
-/*
- * On cygwin, overlapping memory mappings are not allowed. However, it's
- * possible to use the MAP_NORESERVE flag which won't allocate memory for a
- * protected mapping and then use mprotect() on chunks of this mapping to
- * change the protection and allocate/deallocate the memory.
- */
-
 /* reserve inaccessible memory space without allocation any memory */
 static void *memory_map(size_t length)
 {
@@ -46,66 +38,37 @@ static void *memory_map(size_t length)
 	return ret;
 }
 
-/* Set protection to read/write which allocated memory */
+static void memory_unmap(void *ptr, size_t length)
+{
+	int ret __attribute__((unused));
+
+	ret = munmap(ptr, length);
+
+	assert(ret == 0);
+}
+
+/*
+ * Set the protection on a chunk of the mapping to read / write which will
+ * make it accessible and allocate the memory.
+ */
 static void memory_populate(void *ptr, size_t length)
 {
 	int ret __attribute__((unused));
 
 	ret = mprotect(ptr, length, PROT_READ | PROT_WRITE);
 
-	assert(!ret);
+	assert(ret == 0);
 }
 
-/* Set protection to none which reclaims memory */
+/*
+ * Set the protection on a chunk of the mapping to none which will
+ * make it inaccessible and deallocate the memory.
+ */
 static void memory_discard(void *ptr, size_t length)
 {
 	int ret __attribute__((unused));
 
 	ret = mprotect(ptr, length, PROT_NONE);
-
-	assert(!ret);
-}
-#else /* __CYGWIN__ */
-/* reserve inaccessible memory space without allocation any memory */
-static void *memory_map(size_t length)
-{
-	void *ret = mmap(NULL, length, PROT_NONE,
-			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-	assert(ret != MAP_FAILED);
-	return ret;
-}
-
-static void memory_populate(void *ptr, size_t length)
-{
-	void *ret __attribute__((unused));
-
-	ret = mmap(ptr, length, PROT_READ | PROT_WRITE,
-			MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-	assert(ret == ptr);
-}
-
-/*
- * Discard garbage memory and avoid system save it when try to swap it out.
- * Make it still reserved, inaccessible.
- */
-static void memory_discard(void *ptr, size_t length)
-{
-	void *ret __attribute__((unused));
-
-	ret = mmap(ptr, length, PROT_NONE,
-			MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-	assert(ret == ptr);
-}
-#endif /* __CYGWIN__ */
-
-static void memory_unmap(void *ptr, size_t length)
-{
-	int ret __attribute__((unused));
-
-	ret = munmap(ptr, length);
 
 	assert(ret == 0);
 }
