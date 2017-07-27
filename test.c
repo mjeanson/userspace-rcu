@@ -117,6 +117,11 @@ int main() {
 			perror("mprotect");
 			return 1;
 		}
+		ret = madvise(chunk_addr, chunk, MADV_DONTNEED);
+		if (ret != 0) {
+			perror("madvise");
+			return 1;
+		}
 	}
 
 	printf("Deallocated 50 chunks of memory with mprotect\n");
@@ -164,6 +169,11 @@ int main() {
 		ret_addr = mmap(chunk_addr, chunk, PROT_NONE, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 		if (ret_addr == MAP_FAILED) {
 			perror("mmap");
+			return 1;
+		}
+		ret = madvise(chunk_addr, chunk, MADV_DONTNEED);
+		if (ret != 0) {
+			perror("madvise");
 			return 1;
 		}
 	}
