@@ -285,10 +285,11 @@ void hashword2(
 
 	/*----------------------------------- handle the last 3 uint32_t's */
 	switch (length) {	/* all the case statements fall through */
-	case 3: c += k[2];
-	case 2: b += k[1];
+	case 3: c += k[2]; __attribute__((fallthrough));
+	case 2: b += k[1]; __attribute__((fallthrough));
 	case 1: a += k[0];
 		final(a, b, c);
+		__attribute__((fallthrough));
 	case 0:			/* case 0: nothing left to add */
 		break;
 	}
